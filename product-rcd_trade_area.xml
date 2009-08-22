@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<product productid="rcd_trade_area" active="1">
+	<title>Trade Area</title>
+	<description />
+	<version>0.9</version>
+	<url />
+	<versioncheckurl />
+	<apm_releasedate>1233525600</apm_releasedate>
+	<apm_author>Dmitry Titov, Vitaly Puzrin</apm_author>
+	<apm_relatedurl />
+	<apm_extrainfo />
+	<apm_extraedit />
+	<dependencies>
+	</dependencies>
+	<codes>
+	</codes>
+	<templates>
+		<template name="trade_area_city" templatetype="template" date="1230974952" username="Wildev" version=""><![CDATA[<span class="shade">$thread[threadusercity]</span>]]></template>
+		<template name="trade_area_quick_reply_notice" templatetype="template" date="1232139766" username="Wildev" version=""><![CDATA[	<br />
+	<table class="tborder" cellpadding="$stylevar[cellpadding]" cellspacing="$stylevar[cellspacing]" border="0" width="100%" align="center">
+	<tr>
+		<td class="thead">$vbphrase[notices]</td>
+	</tr>
+	<tr>
+		<td class="alt1">$show[quick_reply_notice]</td>
+	</tr>
+	</table>
+]]></template>
+	</templates>
+	<plugins>
+		<plugin active="1" executionorder="1">
+			<title>Advanced BBCode Permissions Fix (step 1)</title>
+			<hookname>bbcode_parse_start</hookname>
+			<phpcode><![CDATA[if ($forumid == 'tradeareanotice')
+{
+  $dohtml = $this->registry->options['allowhtml'];
+  $dobbcode = $this->registry->options['allowbbcode'];
+  $dobbimagecode = $this->registry->options['allowbbimagecode'];
+  $dosmilies = $this->registry->options['allowsmilies'];
+
+  if (!$allowsmilie)
+  {
+    $dosmilies = false;
+  }
+
+  $parsedtext = 'trade area notice';
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="10">
+			<title>Advanced BBCode Permissions Fix (step 2)</title>
+			<hookname>bbcode_parse_start</hookname>
+			<phpcode><![CDATA[if ($forumid == 'tradeareanotice')
+{
+  $parsedtext = '';
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Cache Templates</title>
+			<hookname>cache_templates</hookname>
+			<phpcode><![CDATA[if ($vbulletin->options['rcd_ta_enable'])
+{
+  $globaltemplates[] = 'trade_area_city';
+  $globaltemplates[] = 'trade_area_quick_reply_notice';
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Forum display query modification</title>
+			<hookname>forumdisplay_query</hookname>
+			<phpcode><![CDATA[if ($rcd_ta_enabled && !isset($_POST['preview']))
+{
+  $show['rcdtacity'] = true;
+
+  $hook_query_fields =
+    ', TAUF.`field2` AS threadusercity';
+
+  $hook_query_joins  =
+    ' LEFT JOIN ' . TABLE_PREFIX . 'userfield AS TAUF ON( thread.postuserid = TAUF.userid ) ';
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Add new thread notice</title>
+			<hookname>global_start</hookname>
+			<phpcode><![CDATA[if ($rcd_ta_enabled && THIS_SCRIPT == 'newthread' &&
+    !empty($vbulletin->options['notice_ta_new_thread_html']))
+{
+  require_once(DIR . '/includes/class_bbcode.php');
+
+  $bbcode_parser =& new vB_BbCodeParser($vbulletin, fetch_tag_list());
+
+  $vbphrase['notice_ta_new_thread_html'] =
+    $bbcode_parser->parse($vbulletin->options['notice_ta_new_thread_html'], 'tradeareanotice');
+
+  $vbulletin->noticecache['ta_new_thread'] = array(
+    'persistent' => 1,
+  );
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="1">
+			<title>Check for enabled trade area</title>
+			<hookname>global_start</hookname>
+			<phpcode><![CDATA[$rcd_ta_enabled = false;
+
+if ($vbulletin->options['rcd_ta_enable'])
+{
+  $ta_this_forum = explode(',', $foruminfo['parentlist']);
+  $ta_forums     = explode(',', $vbulletin->options['rcd_ta_forum_ids']);
+
+  foreach ($ta_forums AS &$ta_forumid)
+  {
+    if (in_array(intval($ta_forumid), $ta_this_forum))
+    {
+      $rcd_ta_enabled = true;
+      break;
+    }
+  }
+
+  unset($ta_forums, $ta_this_forum);
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="20">
+			<title>Edit time limit, disable edit button</title>
+			<hookname>global_start</hookname>
+			<phpcode><![CDATA[if ($rcd_ta_enabled /*&& THIS_SCRIPT == 'editpost'*/ /*&& isset($forum)*/)
+{
+  $vbulletin->options['edittimelimit'] =
+    $vbulletin->options['rcd_ta_doublepost_timespan'];
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Add new reply notice</title>
+			<hookname>global_start</hookname>
+			<phpcode><![CDATA[if ($rcd_ta_enabled && THIS_SCRIPT == 'newreply' &&
+    !empty($vbulletin->options['notice_ta_new_reply_html']))
+{
+  require_once(DIR . '/includes/class_bbcode.php');
+
+  $bbcode_parser =& new vB_BbCodeParser($vbulletin, fetch_tag_list());
+
+  $vbphrase['notice_ta_new_reply_html'] =
+    $bbcode_parser->parse($vbulletin->options['notice_ta_new_reply_html'], 'tradeareanotice');
+
+  $vbulletin->noticecache['ta_new_reply'] = array(
+    'persistent' => 1,
+  );
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Override doubleposting parameters</title>
+			<hookname>newpost_process</hookname>
+			<phpcode><![CDATA[global $rcd_ta_enabled;
+
+if ($rcd_ta_enabled)
+{
+  $vbulletin->options['dpmod_timespan'] =
+    $vbulletin->options['rcd_ta_doublepost_timespan'];
+
+  $vbulletin->options['dpmod_delimeter_enable'] =
+    $vbulletin->options['rcd_ta_doublepost_show_splitter'];
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Add City field to template</title>
+			<hookname>parse_templates</hookname>
+			<phpcode><![CDATA[if ($rcd_ta_enabled && !isset($_POST['preview']))
+{
+  $ta_city_tpl = fetch_template('trade_area_city');
+
+  $ta_search  = array(
+      '$show[\'taglist\'] OR ',
+      '".(($show[\'taglist\'])'
+    );
+
+  $ta_replace = array(
+      '$show[\'rcdtacity\'] OR $show[\'taglist\'] OR ',
+      '".(($show[\'rcdtacity\'] AND !$show[\'rcdtacityskip\']) ? (" '
+        . $ta_city_tpl
+        . ' ") : (""))."'
+        . '".(($show[\'taglist\'])'
+    );
+
+  $vbulletin->templatecache['threadbit'] = str_replace(
+      $ta_search  ,
+      $ta_replace ,
+      $vbulletin->templatecache['threadbit']
+    );
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="10">
+			<title>Add background image to post</title>
+			<hookname>parse_templates</hookname>
+			<phpcode><![CDATA[if ($rcd_ta_enabled && $vbulletin->options['rcd_ta_closed_thread_bg_image_enable'])
+{
+  $ta_bg_image = 'topic_closed_bg.png';
+
+  $ta_search_common  = array(
+      ' id=\"post_message_'
+    );
+
+  $ta_replace_common = array(
+      ' ".($show[\'rcdtapostbg\'] ? ("'
+      . 'style=\"background-image: url($stylevar[imgdir_misc]/' . $ta_bg_image . ');\"'
+      . ' ") : (""))."'
+      . 'id=\"post_message_'
+    );
+
+  $ta_search_legacy  = array(
+      ' id=\"td_post_'
+    );
+
+  $ta_replace_legacy = array(
+      ' ".($show[\'rcdtapostbg\'] ? ("'
+      . 'style=\"background-image: url($stylevar[imgdir_misc]/' . $ta_bg_image . ');\"'
+      . ' ") : (""))."'
+      . 'id=\"td_post_'
+    );
+
+
+  $vbulletin->templatecache['postbit'] = str_replace(
+      $ta_search_common  ,
+      $ta_replace_common ,
+      $vbulletin->templatecache['postbit']
+    );
+
+  $vbulletin->templatecache['postbit_legacy'] = str_replace(
+      $ta_search_legacy  ,
+      $ta_replace_legacy ,
+      $vbulletin->templatecache['postbit_legacy']
+    );
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Add quick reply notice</title>
+			<hookname>parse_templates</hookname>
+			<phpcode><![CDATA[if ($rcd_ta_enabled && THIS_SCRIPT == 'showthread' &&
+    !empty($vbulletin->options['notice_ta_new_reply_html']))
+{
+  $ta_notice_tpl = fetch_template('trade_area_quick_reply_notice');
+
+  $ta_search  = array(
+      '<!-- quick reply -->'
+    );
+
+  $ta_replace = array(
+      '<!-- quick reply -->'
+      . $ta_notice_tpl
+    );
+
+  $vbulletin->templatecache['SHOWTHREAD'] = str_replace(
+      $ta_search  ,
+      $ta_replace ,
+      $vbulletin->templatecache['SHOWTHREAD']
+    );
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Add background image to post</title>
+			<hookname>showthread_post_start</hookname>
+			<phpcode><![CDATA[if ($rcd_ta_enabled AND !$thread['open'])
+{
+  $show['rcdtapostbg'] = true;
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Show quick reply notice</title>
+			<hookname>showthread_post_start</hookname>
+			<phpcode><![CDATA[if ($rcd_ta_enabled && THIS_SCRIPT == 'showthread' &&
+    !empty($vbulletin->options['notice_ta_new_reply_html']) &&
+    $show['quickreply'])
+{
+	require_once(DIR . '/includes/functions_notice.php');
+  require_once(DIR . '/includes/class_bbcode.php');
+
+  $bbcode_parser =& new vB_BbCodeParser($vbulletin, fetch_tag_list());
+
+  $vbphrase['notice_ta_new_reply_html'] =
+    $bbcode_parser->parse($vbulletin->options['notice_ta_new_reply_html'], 'tradeareanotice');
+
+  $vbulletin->noticecache['ta_new_reply'] = array(
+    'persistent' => 1,
+  );
+
+  $_noticeid = 'ta_new_reply';
+
+  $notice_html = str_replace(array('{musername}', '{username}', '{userid}', '{sessionurl}'), array($vbulletin->userinfo['musername'], $vbulletin->userinfo['username'], $vbulletin->userinfo['userid'], $vbulletin->session->vars['sessionurl']), $vbphrase["notice_{$_noticeid}_html"]);
+
+  ($hook = vBulletinHook::fetch_hook('notices_noticebit')) ? eval($hook) : false;
+
+  eval('$show[\'quick_reply_notice\'] .= "' . fetch_template('navbar_noticebit') . '";');
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Check for sticky thread</title>
+			<hookname>threadbit_display</hookname>
+			<phpcode><![CDATA[if ($rcd_ta_enabled)
+{
+  if ($show['rcdtacity'] && $thread['sticky']
+      && !$vbulletin->options['rcd_ta_show_sticky_city'])
+  {
+    $show['rcdtacityskip'] = true;
+  }
+  else
+  {
+    $show['rcdtacityskip'] = false;
+  }
+}]]></phpcode>
+		</plugin>
+	</plugins>
+	<phrases>
+		<phrasetype name="GLOBAL" fieldname="global">
+			<phrase name="notice_ta_new_reply_html" date="1232129655" username="Wildev" version=""><![CDATA[<!-- -->]]></phrase>
+			<phrase name="notice_ta_new_thread_html" date="1232129430" username="Wildev" version=""><![CDATA[<!-- -->]]></phrase>
+		</phrasetype>
+		<phrasetype name="vBulletin Settings" fieldname="vbsettings">
+			<phrase name="setting_notice_ta_new_reply_html_desc" date="1232129572" username="Wildev" version="0.4" />
+			<phrase name="setting_notice_ta_new_reply_html_title" date="1232129572" username="Wildev" version="0.4"><![CDATA[New Reply Notice]]></phrase>
+			<phrase name="setting_notice_ta_new_thread_html_desc" date="1232129529" username="Wildev" version="0.4" />
+			<phrase name="setting_notice_ta_new_thread_html_title" date="1232129529" username="Wildev" version="0.4"><![CDATA[New Thread Notice]]></phrase>
+			<phrase name="setting_rcd_ta_closed_thread_bg_image_enable_desc" date="1231021502" username="Wildev" version="0.3" />
+			<phrase name="setting_rcd_ta_closed_thread_bg_image_enable_title" date="1231021502" username="Wildev" version="0.3"><![CDATA[Show background image for closed threads?]]></phrase>
+			<phrase name="setting_rcd_ta_doublepost_show_splitter_desc" date="1235569415" username="Dimit" version="0.8" />
+			<phrase name="setting_rcd_ta_doublepost_show_splitter_title" date="1235569415" username="Dimit" version="0.8"><![CDATA[Doubleposting use delimeter]]></phrase>
+			<phrase name="setting_rcd_ta_doublepost_timespan_desc" date="1232987647" username="Wildev" version="0.6"><![CDATA[How many minutes until a new post is no longer considered as doublepost?]]></phrase>
+			<phrase name="setting_rcd_ta_doublepost_timespan_title" date="1232987647" username="Wildev" version="0.6"><![CDATA[Doubleposting timespan]]></phrase>
+			<phrase name="setting_rcd_ta_enable_desc" date="1230979079" username="Wildev" version="0.2" />
+			<phrase name="setting_rcd_ta_enable_title" date="1230979079" username="Wildev" version="0.2"><![CDATA[Enable product?]]></phrase>
+			<phrase name="setting_rcd_ta_forum_ids_desc" date="1230979250" username="Wildev" version="0.2"><![CDATA[Trade Area forum ids]]></phrase>
+			<phrase name="setting_rcd_ta_forum_ids_title" date="1230979250" username="Wildev" version="0.2"><![CDATA[Forum IDs]]></phrase>
+			<phrase name="setting_rcd_ta_show_sticky_city_desc" date="1231021426" username="Wildev" version="0.3" />
+			<phrase name="setting_rcd_ta_show_sticky_city_title" date="1231021426" username="Wildev" version="0.3"><![CDATA[Show city name for sticky threads?]]></phrase>
+			<phrase name="settinggroup_rcd_trade_area" date="1230979079" username="Wildev" version="0.2"><![CDATA[Trade Area]]></phrase>
+		</phrasetype>
+	</phrases>
+	<options>
+		<settinggroup name="rcd_trade_area" displayorder="10000">
+			<setting varname="rcd_ta_enable" displayorder="1">
+				<datatype>boolean</datatype>
+				<optioncode>yesno</optioncode>
+				<defaultvalue>0</defaultvalue>
+			</setting>
+			<setting varname="rcd_ta_forum_ids" displayorder="10">
+				<datatype>free</datatype>
+				<defaultvalue>14,15,16,17,18,28,50,51,97</defaultvalue>
+			</setting>
+			<setting varname="rcd_ta_show_sticky_city" displayorder="20">
+				<datatype>boolean</datatype>
+				<optioncode>yesno</optioncode>
+				<defaultvalue>1</defaultvalue>
+			</setting>
+			<setting varname="rcd_ta_closed_thread_bg_image_enable" displayorder="30">
+				<datatype>boolean</datatype>
+				<optioncode>yesno</optioncode>
+				<defaultvalue>1</defaultvalue>
+			</setting>
+			<setting varname="notice_ta_new_thread_html" displayorder="40">
+				<datatype>free</datatype>
+				<optioncode>textarea</optioncode>
+			</setting>
+			<setting varname="notice_ta_new_reply_html" displayorder="50">
+				<datatype>free</datatype>
+				<optioncode>textarea</optioncode>
+			</setting>
+			<setting varname="rcd_ta_doublepost_timespan" displayorder="60">
+				<datatype>number</datatype>
+				<defaultvalue>10080</defaultvalue>
+			</setting>
+			<setting varname="rcd_ta_doublepost_show_splitter" displayorder="70">
+				<datatype>boolean</datatype>
+				<optioncode>yesno</optioncode>
+				<defaultvalue>1</defaultvalue>
+			</setting>
+		</settinggroup>
+	</options>
+	<helptopics>
+	</helptopics>
+	<cronentries>
+	</cronentries>
+	<faqentries>
+	</faqentries>
+	<templateedits>
+	</templateedits>
+</product>
