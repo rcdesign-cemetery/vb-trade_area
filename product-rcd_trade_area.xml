@@ -3,10 +3,10 @@
 <product productid="rcd_trade_area" active="1">
 	<title>Trade Area</title>
 	<description />
-	<version>0.9</version>
+	<version>0.10</version>
 	<url />
 	<versioncheckurl />
-	<apm_releasedate>1233525600</apm_releasedate>
+	<apm_releasedate>1259704800</apm_releasedate>
 	<apm_author>Dmitry Titov, Vitaly Puzrin</apm_author>
 	<apm_relatedurl />
 	<apm_extrainfo />
@@ -152,10 +152,18 @@ if ($vbulletin->options['rcd_ta_enable'])
 
 if ($rcd_ta_enabled)
 {
+  // DoublePost Preventions Plus
   $vbulletin->options['dpmod_timespan'] =
     $vbulletin->options['rcd_ta_doublepost_timespan'];
 
   $vbulletin->options['dpmod_delimeter_enable'] =
+    $vbulletin->options['rcd_ta_doublepost_show_splitter'];
+
+  // Merge Double Posts
+  $vbulletin->options['mrgdp_timespan'] =
+    $vbulletin->options['rcd_ta_doublepost_timespan'];
+
+  $vbulletin->options['mrgdp_delimeter_enable'] =
     $vbulletin->options['rcd_ta_doublepost_show_splitter'];
 }]]></phpcode>
 		</plugin>
