@@ -29,32 +29,6 @@
 ]]></template>
 	</templates>
 	<plugins>
-		<plugin active="1" executionorder="1">
-			<title>Advanced BBCode Permissions Fix (step 1)</title>
-			<hookname>bbcode_parse_start</hookname>
-			<phpcode><![CDATA[if ($forumid == 'tradeareanotice')
-{
-  $dohtml = $this->registry->options['allowhtml'];
-  $dobbcode = $this->registry->options['allowbbcode'];
-  $dobbimagecode = $this->registry->options['allowbbimagecode'];
-  $dosmilies = $this->registry->options['allowsmilies'];
-
-  if (!$allowsmilie)
-  {
-    $dosmilies = false;
-  }
-
-  $parsedtext = 'trade area notice';
-}]]></phpcode>
-		</plugin>
-		<plugin active="1" executionorder="10">
-			<title>Advanced BBCode Permissions Fix (step 2)</title>
-			<hookname>bbcode_parse_start</hookname>
-			<phpcode><![CDATA[if ($forumid == 'tradeareanotice')
-{
-  $parsedtext = '';
-}]]></phpcode>
-		</plugin>
 		<plugin active="1" executionorder="5">
 			<title>Cache Templates</title>
 			<hookname>cache_templates</hookname>
