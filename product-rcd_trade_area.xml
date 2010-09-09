@@ -80,16 +80,9 @@
 if (is_rcd_ta_enabled())
 {
     $vbulletin->options['edittimelimit'] = $vbulletin->options['rcd_ta_doublepost_timespan']; 
-}]]></phpcode>
-		</plugin>
-		<plugin active="1" executionorder="5">
-			<title>Override doubleposting parameters</title>
-			<hookname>newpost_process</hookname>
-			<phpcode><![CDATA[if (is_rcd_ta_enabled())
-{
-    // Merge Double Posts
-    $vbulletin->options['mrgdp_timespan'] = $vbulletin->options['rcd_ta_doublepost_timespan'];
 
+    // Sync merge double posts parameter
+    $vbulletin->options['mrgdp_timespan'] = $vbulletin->options['rcd_ta_doublepost_timespan'];
     $vbulletin->options['mrgdp_delimeter_enable'] = $vbulletin->options['rcd_ta_doublepost_show_splitter'];
 }]]></phpcode>
 		</plugin>
