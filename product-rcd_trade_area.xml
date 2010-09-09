@@ -6,11 +6,11 @@
 	<version>0.11</version>
 	<url />
 	<versioncheckurl />
-	<apm_releasedate></apm_releasedate>
-	<apm_author></apm_author>
-	<apm_relatedurl></apm_relatedurl>
-	<apm_extrainfo></apm_extrainfo>
-	<apm_extraedit></apm_extraedit>
+	<apm_releasedate>0</apm_releasedate>
+	<apm_author />
+	<apm_relatedurl />
+	<apm_extrainfo />
+	<apm_extraedit />
 	<dependencies>
 	</dependencies>
 	<codes>
@@ -50,7 +50,7 @@
 		</plugin>
 		<plugin active="1" executionorder="5">
 			<title>Declare function in global namespace</title>
-			<hookname>global_bootstrap_init_start</hookname>
+			<hookname>global_bootstrap_complete</hookname>
 			<phpcode><![CDATA[function is_rcd_ta_enabled()
 {
     global $vbulletin,$foruminfo;
@@ -75,6 +75,11 @@
         }
     }
     return false;
+}
+
+if (is_rcd_ta_enabled())
+{
+    $vbulletin->options['edittimelimit'] = $vbulletin->options['rcd_ta_doublepost_timespan']; 
 }]]></phpcode>
 		</plugin>
 		<plugin active="1" executionorder="5">
@@ -92,8 +97,7 @@
 			<title>Edit time limit and other variables</title>
 			<hookname>showthread_post_start</hookname>
 			<phpcode><![CDATA[if (is_rcd_ta_enabled())
-{
-    $vbulletin->options['edittimelimit'] = $vbulletin->options['rcd_ta_doublepost_timespan']; 
+{ 
     if (!$threadinfo['open'])
     {
         $show['rcd_ta_topic_closed_bg'] = $vbulletin->options['rcd_ta_closed_thread_bg_image_enable'];
