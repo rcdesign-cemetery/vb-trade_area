@@ -3,7 +3,7 @@
 <product productid="rcd_trade_area" active="1">
 	<title>Trade Area</title>
 	<description />
-	<version>0.11</version>
+	<version>0.12</version>
 	<url />
 	<versioncheckurl />
 	<apm_releasedate>0</apm_releasedate>
@@ -84,13 +84,20 @@ if (is_rcd_ta_enabled())
     // Sync merge double posts parameter
     $vbulletin->options['mrgdp_timespan'] = $vbulletin->options['rcd_ta_doublepost_timespan'];
     $vbulletin->options['mrgdp_delimeter_enable'] = $vbulletin->options['rcd_ta_doublepost_show_splitter'];
+
+    // Disable tagging
+    // 6 - Administrator group id
+    if (!is_member_of($vbulletin->userinfo,6))
+    {
+        $vbulletin->options['threadtagging'] = 0;
+    }
 }]]></phpcode>
 		</plugin>
 		<plugin active="1" executionorder="5">
 			<title>Edit time limit and other variables</title>
 			<hookname>showthread_post_start</hookname>
 			<phpcode><![CDATA[if (is_rcd_ta_enabled())
-{ 
+{
     if (!$threadinfo['open'])
     {
         $show['rcd_ta_topic_closed_bg'] = $vbulletin->options['rcd_ta_closed_thread_bg_image_enable'];
