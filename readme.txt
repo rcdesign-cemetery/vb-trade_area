@@ -11,6 +11,6 @@ Additional settings to use this mod:
 2. Set allowed edit time to ~60 minutes (global)
 3. Set defaul tmerge time to ~60 minutes (global)
 4. Disable users to reply other threads in buy/sell forums
-
+5. Change button behavior and add close/open buttons to threads
 Not released at vborg.
 Not polished

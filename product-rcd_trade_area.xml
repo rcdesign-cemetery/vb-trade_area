@@ -98,9 +98,21 @@ if (is_rcd_ta_enabled())
 			<hookname>showthread_post_start</hookname>
 			<phpcode><![CDATA[if (is_rcd_ta_enabled())
 {
+    $show['rcd_ta_enabled'] = true;
     if (!$threadinfo['open'])
     {
         $show['rcd_ta_topic_closed_bg'] = $vbulletin->options['rcd_ta_closed_thread_bg_image_enable'];
+    }
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Open/close thread handler</title>
+			<hookname>threadmanage_start</hookname>
+			<phpcode><![CDATA[if (is_rcd_ta_enabled())
+{ 
+    if (isset($_GET['do']) && $_GET['do'] == 'openclosethread')
+    {
+        $_POST['do'] = $_GET['do'];
     }
 }]]></phpcode>
 		</plugin>
@@ -109,6 +121,11 @@ if (is_rcd_ta_enabled())
 		<phrasetype name="GLOBAL" fieldname="global">
 			<phrase name="notice_ta_new_reply_html" date="1232129655" username="Wildev" version=""><![CDATA[<!-- -->]]></phrase>
 			<phrase name="notice_ta_new_thread_html" date="1232129430" username="Wildev" version=""><![CDATA[<!-- -->]]></phrase>
+		</phrasetype>
+		<phrasetype name="Show Thread" fieldname="showthread">
+			<phrase name="rcd_ta_close_thrd" date="1287128130" username="ruseinov" version=""><![CDATA[Close]]></phrase>
+			<phrase name="rcd_ta_contact_author" date="1287126190" username="ruseinov" version=""><![CDATA[Contact author]]></phrase>
+			<phrase name="rcd_ta_open_thrd" date="1287128162" username="ruseinov" version=""><![CDATA[Open]]></phrase>
 		</phrasetype>
 		<phrasetype name="vBulletin Settings" fieldname="vbsettings">
 			<phrase name="setting_rcd_ta_closed_thread_bg_image_enable_desc" date="1277278094" username="varnak" version="0.11" />
@@ -170,6 +187,75 @@ if (is_rcd_ta_enabled())
 			<searchstr><![CDATA[<div class="postbody">]]></searchstr>
 			<replacestr><![CDATA[<div class="postbody" 
 <vb:if condition="$show['rcd_ta_topic_closed_bg']">style="background: url({vb:stylevar imgdir_misc}/topic_closed_bg.png ) center;"</vb:if>>]]></replacestr>
+		</templateedit>
+		<templateedit template="SHOWTHREAD" varname="rcd_ta_showthrd_btns_botm" username="ruseinov" version="4.0.7" dateline="1287135809" searchorder="5" active="1">
+			<title>Change buttons on thread bottom</title>
+			<searchstr><![CDATA[<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+            class="newcontent_textcontrol" id="newreplylink_bottom"
+            ><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else />{vb:rawphrase closed_thread}</vb:if></a>]]></searchstr>
+			<replacestr><![CDATA[<vb:if condition="$show['rcd_ta_enabled']">  
+<vb:if condition="$thread['postuserid'] == $bbuserinfo['userid']">
+<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+class="newcontent_textcontrol" id="newreplylink_bottom" ><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else /> {vb:rawphrase closed_thread}</vb:if></a>
+<vb:if condition="$show['openclose']">
+<vb:if condition="$show['closethread']">
+<a href="postings.php?{vb:raw session.sessionurl}t={vb:raw threadid}&do=openclosethread" 
+class="newcontent_textcontrol" style="left:160px;"><span>&nbsp;</span>{vb:rawphrase rcd_ta_close_thrd}</a>
+<vb:else />
+<a href="postings.php?{vb:raw session.sessionurl}t={vb:raw threadid}&do=openclosethread" 
+class="newcontent_textcontrol" style="left:138px;">{vb:rawphrase rcd_ta_open_thrd}</a>
+</vb:if>
+</vb:if>
+<vb:else />
+<vb:if condition="$show['closethread']">
+<a href="private.php?{vb:raw session.sessionurl}do=newpm&amp;u={vb:raw thread.postuserid}&amp;postid={vb:raw LASTPOSTID}" 
+class="newcontent_textcontrol" >{vb:rawphrase rcd_ta_contact_author}</a>
+<vb:else />
+<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+class="newcontent_textcontrol" >
+{vb:rawphrase closed_thread}</a>
+</vb:if>
+</vb:if>
+<vb:else />
+<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+class="newcontent_textcontrol" id="newreplylink_bottom"><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else />{vb:rawphrase closed_thread}</vb:if></a>
+</vb:if>]]></replacestr>
+		</templateedit>
+		<templateedit template="SHOWTHREAD" varname="rcd_ta_showthrd_btns_top" username="ruseinov" version="4.0.7" dateline="1287135820" searchorder="5" active="1">
+			<title>Change buttons on thread top</title>
+			<searchstr><![CDATA[<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+class="newcontent_textcontrol" id="newreplylink_top"><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else />{vb:rawphrase closed_thread}</vb:if></a>
+			<img style="display:none" id="progress_newreplylink_top" src="{vb:stylevar imgdir_misc}/progress.gif"  alt="" />
+	]]></searchstr>
+			<replacestr><![CDATA[<vb:if condition="$show['rcd_ta_enabled']">  
+<vb:if condition="$thread['postuserid'] == $bbuserinfo['userid']">
+<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+class="newcontent_textcontrol" id="newreplylink_top" ><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else /> {vb:rawphrase closed_thread}</vb:if></a>
+<vb:if condition="$show['openclose']">
+<vb:if condition="$show['closethread']">
+<a href="postings.php?{vb:raw session.sessionurl}t={vb:raw threadid}&do=openclosethread" 
+class="newcontent_textcontrol" style="margin-left:10px;"><span>&nbsp;</span>{vb:rawphrase rcd_ta_close_thrd}</a>
+<vb:else />
+<a href="postings.php?{vb:raw session.sessionurl}t={vb:raw threadid}&do=openclosethread" 
+class="newcontent_textcontrol" style="margin-left:10px;">{vb:rawphrase rcd_ta_open_thrd}</a>
+</vb:if>
+</vb:if>
+<vb:else />
+<vb:if condition="$show['closethread']">
+<a href="private.php?{vb:raw session.sessionurl}do=newpm&amp;u={vb:raw thread.postuserid}&amp;postid={vb:raw LASTPOSTID}" 
+class="newcontent_textcontrol" >{vb:rawphrase rcd_ta_contact_author}</a>
+<vb:else />
+<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+class="newcontent_textcontrol" >
+{vb:rawphrase closed_thread}</a>
+</vb:if>
+</vb:if>
+<vb:else />
+<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+class="newcontent_textcontrol" id="newreplylink_top"><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else />{vb:rawphrase closed_thread}</vb:if></a>
+</vb:if>
+<img style="display:none" id="progress_newreplylink_top" src="{vb:stylevar imgdir_misc}/progress.gif"  alt="" />
+]]></replacestr>
 		</templateedit>
 		<templateedit template="threadbit" varname="rcd_ta_thread_city" username="Vitaly" version="4.0.4" dateline="1277383388" searchorder="5" active="1">
 			<title>City in threads list</title>
