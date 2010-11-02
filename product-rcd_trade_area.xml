@@ -79,6 +79,8 @@
 
 if (is_rcd_ta_enabled())
 {
+    global $vbulletin;
+
     $vbulletin->options['edittimelimit'] = $vbulletin->options['rcd_ta_doublepost_timespan']; 
 
     // Sync merge double posts parameter
