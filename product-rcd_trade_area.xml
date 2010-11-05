@@ -51,9 +51,34 @@
 		<plugin active="1" executionorder="5">
 			<title>Declare function in global namespace</title>
 			<hookname>global_bootstrap_complete</hookname>
-			<phpcode><![CDATA[function is_rcd_ta_enabled()
+			<phpcode><![CDATA[if (THIS_SCRIPT == 'newattachment' && isset($_REQUEST['values']['p']))
 {
-    global $vbulletin,$foruminfo;
+    require_once(DIR . '/includes/class_bootstrap_framework.php');
+    vB_Bootstrap_Framework::init();
+    
+    if (isset($_REQUEST['contenttypeid']) 
+         && $_REQUEST['contenttypeid'] == vB_Types::instance()->getContentTypeID('vBForum_Post'))
+    {
+        global $foruminfo;
+        
+        $rcd_hi_postinfo = verify_id('post', intval($_REQUEST['values']['p']), 0, 1);
+            
+        if ($rcd_hi_postinfo)
+        {
+            $rcd_hi_threadinfo = verify_id('thread', $rcd_hi_postinfo['threadid'], 0, 1);
+    
+            if ($rcd_hi_threadinfo)
+            {
+                $foruminfo = fetch_foruminfo($rcd_hi_threadinfo['forumid']);   
+            }
+        }
+    }
+}
+
+function is_rcd_ta_enabled()
+{
+    global $vbulletin, $foruminfo;
+    
     $ta_forums     = explode(',', $vbulletin->options['rcd_ta_forum_ids']);
     $forum_parent_list = explode(',', $foruminfo['parentlist']);
     $x_and_children = $vbulletin->options['rcd_ta_x_and_children'];
