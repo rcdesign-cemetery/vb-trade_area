@@ -3,7 +3,7 @@
 <product productid="rcd_trade_area" active="1">
 	<title>Trade Area</title>
 	<description />
-	<version>0.12</version>
+	<version>0.13</version>
 	<url />
 	<versioncheckurl />
 	<apm_releasedate>0</apm_releasedate>
@@ -26,7 +26,7 @@
 	uninstall_templateedits($vbulletin->GPC['productid']);
 }]]></uninstallcode>
 		</code>
-		<code version="0.12">
+		<code version="0.13">
 			<installcode><![CDATA[$db->hide_errors();
 $db->query_write("ALTER TABLE " . TABLE_PREFIX . "thread ADD INDEX `open_threads_count` ( `postuserid`, `forumid` , `open`, `visible` ) ");
 $db->show_errors();]]></installcode>
