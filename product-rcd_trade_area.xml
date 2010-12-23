@@ -26,6 +26,14 @@
 	uninstall_templateedits($vbulletin->GPC['productid']);
 }]]></uninstallcode>
 		</code>
+		<code version="0.12">
+			<installcode><![CDATA[$db->hide_errors();
+$db->query_write("ALTER TABLE " . TABLE_PREFIX . "thread ADD INDEX `open_threads_count` ( `postuserid`, `forumid` , `open`, `visible` ) ");
+$db->show_errors();]]></installcode>
+			<uninstallcode><![CDATA[$db->hide_errors();
+$db->query_write("ALTER TABLE " . TABLE_PREFIX . "thread DROP INDEX open_threads_count");
+$db->show_errors();]]></uninstallcode>
+		</code>
 	</codes>
 	<templates>
 	</templates>
@@ -75,6 +83,36 @@
     }
 }
 
+// returns non-empty array if is_rcd_ta_enabled is true. Otherwise could return empty array
+function get_rcd_ta_forum_list()
+{
+    global $vbulletin;
+
+    $ta_forums = explode(',', $vbulletin->options['rcd_ta_forum_ids']);
+    $x_and_children = $vbulletin->options['rcd_ta_x_and_children'];
+
+    $ta_forum_list = array();
+    if ($x_and_children)
+    {
+        foreach ($ta_forums AS $ta_forum_id)
+        {
+            foreach($vbulletin->forumcache as $key => $cache)
+            {
+                if (in_array($ta_forum_id, explode(',',$cache['parentlist'])))
+                {
+                    $ta_forum_list[] = $key;
+                }
+            }
+        }
+    }
+    else
+    {
+        $ta_forum_list = $ta_forums;
+    }
+
+    return $ta_forum_list;
+}
+
 function is_rcd_ta_enabled()
 {
     global $vbulletin, $foruminfo;
@@ -121,6 +159,24 @@ if (is_rcd_ta_enabled())
 }]]></phpcode>
 		</plugin>
 		<plugin active="1" executionorder="5">
+			<title>Check for open threads on new thread</title>
+			<hookname>newthread_post_start</hookname>
+			<phpcode><![CDATA[global $vbulletin;
+if (is_rcd_ta_enabled() AND $vbulletin->options['rcd_ta_max_open_threads'] > 0)
+{
+    $forum_list = get_rcd_ta_forum_list();
+
+    $result = $vbulletin->db->query_first('SELECT count(threadid) as cnt FROM '. TABLE_PREFIX .'thread as thread
+                                           WHERE postuserid= '. $vbulletin->userinfo['userid'] .' AND forumid IN ('. implode(',', $forum_list) .')
+                                           AND open=1 AND visible=1');
+
+    if ($result AND ($result['cnt'] > $vbulletin->options['rcd_ta_max_open_threads']))
+    {
+        eval(standard_error(fetch_error('rcd_ta_many_open_threads', $vbulletin->options['rcd_ta_max_open_threads'])));
+    }
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
 			<title>Edit time limit and other variables</title>
 			<hookname>showthread_post_start</hookname>
 			<phpcode><![CDATA[if (is_rcd_ta_enabled())
@@ -129,6 +185,26 @@ if (is_rcd_ta_enabled())
     if (!$threadinfo['open'])
     {
         $show['rcd_ta_topic_closed_bg'] = $vbulletin->options['rcd_ta_closed_thread_bg_image_enable'];
+    }
+}]]></phpcode>
+		</plugin>
+		<plugin active="1" executionorder="5">
+			<title>Check for open threads on thread reopening</title>
+			<hookname>threadmanage_openclose</hookname>
+			<phpcode><![CDATA[global $vbulletin;
+if ($_POST['do'] == 'openclosethread' AND
+    is_rcd_ta_enabled() AND
+    $vbulletin->options['rcd_ta_max_open_threads'] > 0)
+{
+    $forum_list = get_rcd_ta_forum_list();
+
+    $result = $vbulletin->db->query_first('SELECT count(threadid) as cnt FROM '. TABLE_PREFIX .'thread as thread
+                                           WHERE postuserid= '. $vbulletin->userinfo['userid'] .' AND forumid IN ('. implode(',', $forum_list) .')
+                                           AND open=1 AND visible=1');
+
+    if ($result AND ($result['cnt'] > $vbulletin->options['rcd_ta_max_open_threads']))
+    {
+        eval(standard_error(fetch_error('rcd_ta_many_open_threads', $vbulletin->options['rcd_ta_max_open_threads'])));
     }
 }]]></phpcode>
 		</plugin>
@@ -145,6 +221,9 @@ if (is_rcd_ta_enabled())
 		</plugin>
 	</plugins>
 	<phrases>
+		<phrasetype name="Error Messages" fieldname="error">
+			<phrase name="rcd_ta_many_open_threads" date="1293072100" username="Vitaly" version=""><![CDATA[You can't have more that {1} open threads in trade area. Please, close extra topics before opening a new one.]]></phrase>
+		</phrasetype>
 		<phrasetype name="GLOBAL" fieldname="global">
 			<phrase name="notice_ta_new_reply_html" date="1232129655" username="Wildev" version=""><![CDATA[<!-- -->]]></phrase>
 			<phrase name="notice_ta_new_thread_html" date="1232129430" username="Wildev" version=""><![CDATA[<!-- -->]]></phrase>
@@ -163,6 +242,8 @@ if (is_rcd_ta_enabled())
 			<phrase name="setting_rcd_ta_doublepost_timespan_title" date="1277278071" username="varnak" version="0.11"><![CDATA[Doubleposting timespan]]></phrase>
 			<phrase name="setting_rcd_ta_forum_ids_desc" date="1277383601" username="Vitaly" version="0.11"><![CDATA[Trade Area forum ids (comma separated)]]></phrase>
 			<phrase name="setting_rcd_ta_forum_ids_title" date="1277383601" username="Vitaly" version="0.11"><![CDATA[Forum IDs]]></phrase>
+			<phrase name="setting_rcd_ta_max_open_threads_desc" date="1293089731" username="Jannie" version="0.12"><![CDATA[Sets maximum open threads per user within trade area. Set 0 to disable.]]></phrase>
+			<phrase name="setting_rcd_ta_max_open_threads_title" date="1293089731" username="Jannie" version="0.12"><![CDATA[Maximum open therads in trade area]]></phrase>
 			<phrase name="setting_rcd_ta_show_sticky_city_desc" date="1277278115" username="varnak" version="0.11" />
 			<phrase name="setting_rcd_ta_show_sticky_city_title" date="1277278115" username="varnak" version="0.11"><![CDATA[Show city name for sticky threads?]]></phrase>
 			<phrase name="setting_rcd_ta_x_and_children_desc" date="1277298541" username="Vitaly" version="0.11" />
@@ -200,6 +281,10 @@ if (is_rcd_ta_enabled())
 				<optioncode>yesno</optioncode>
 				<defaultvalue>1</defaultvalue>
 			</setting>
+			<setting varname="rcd_ta_max_open_threads" displayorder="70">
+				<datatype>integer</datatype>
+				<defaultvalue>10</defaultvalue>
+			</setting>
 		</settinggroup>
 	</options>
 	<helptopics>
@@ -215,7 +300,7 @@ if (is_rcd_ta_enabled())
 			<replacestr><![CDATA[<div class="postbody" 
 <vb:if condition="$show['rcd_ta_topic_closed_bg']">style="background: url({vb:stylevar imgdir_misc}/topic_closed_bg.png ) center;"</vb:if>>]]></replacestr>
 		</templateedit>
-		<templateedit template="SHOWTHREAD" varname="rcd_ta_showthrd_btns_botm" username="ruseinov" version="4.0.7" dateline="1287135809" searchorder="5" active="1">
+		<templateedit template="SHOWTHREAD" varname="rcd_ta_showthrd_btns_botm" username="ruseinov" version="4.0.8" dateline="1287135809" searchorder="5" active="1">
 			<title>Change buttons on thread bottom</title>
 			<searchstr><![CDATA[<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
             class="newcontent_textcontrol" id="newreplylink_bottom"
@@ -248,7 +333,7 @@ class="newcontent_textcontrol" >
 class="newcontent_textcontrol" id="newreplylink_bottom"><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else />{vb:rawphrase closed_thread}</vb:if></a>
 </vb:if>]]></replacestr>
 		</templateedit>
-		<templateedit template="SHOWTHREAD" varname="rcd_ta_showthrd_btns_top" username="ruseinov" version="4.0.7" dateline="1287135820" searchorder="5" active="1">
+		<templateedit template="SHOWTHREAD" varname="rcd_ta_showthrd_btns_top" username="ruseinov" version="4.0.8" dateline="1287135820" searchorder="5" active="1">
 			<title>Change buttons on thread top</title>
 			<searchstr><![CDATA[<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
 class="newcontent_textcontrol" id="newreplylink_top"><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else />{vb:rawphrase closed_thread}</vb:if></a>
@@ -284,7 +369,7 @@ class="newcontent_textcontrol" id="newreplylink_top"><vb:if condition="$show['cl
 <img style="display:none" id="progress_newreplylink_top" src="{vb:stylevar imgdir_misc}/progress.gif"  alt="" />
 ]]></replacestr>
 		</templateedit>
-		<templateedit template="threadbit" varname="rcd_ta_thread_city" username="Vitaly" version="4.0.4" dateline="1277383388" searchorder="5" active="1">
+		<templateedit template="threadbit" varname="rcd_ta_thread_city" username="Vitaly" version="4.0.5" dateline="1277383388" searchorder="5" active="1">
 			<title>City in threads list</title>
 			<searchstr><![CDATA[			<div class="threaddetails td">
 				<div class="threaddetailicons">]]></searchstr>
