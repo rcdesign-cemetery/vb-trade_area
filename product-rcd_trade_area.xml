@@ -192,9 +192,9 @@ if (is_rcd_ta_enabled() AND $vbulletin->options['rcd_ta_max_open_threads'] > 0)
 			<title>Check for open threads on thread reopening</title>
 			<hookname>threadmanage_openclose</hookname>
 			<phpcode><![CDATA[global $vbulletin;
-if ($_POST['do'] == 'openclosethread' AND
-    is_rcd_ta_enabled() AND
-    $vbulletin->options['rcd_ta_max_open_threads'] > 0)
+if ($threadman->fetch_field('open') AND
+    $vbulletin->options['rcd_ta_max_open_threads'] > 0 AND
+    is_rcd_ta_enabled())
 {
     $forum_list = get_rcd_ta_forum_list();
 
