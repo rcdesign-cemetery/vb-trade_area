@@ -294,11 +294,11 @@ if ($threadman->fetch_field('open') AND
 	<faqentries>
 	</faqentries>
 	<templateedits>
-		<templateedit template="postbit_legacy" varname="rcd_ta_postbit_close_lmg" username="varnak" version="4.0.4" dateline="1277290314" searchorder="5" active="1">
+		<templateedit template="postbit_legacy" varname="rcd_ta_postbit_close_lmg" username="Vitaly" version="4.0.4" dateline="1299130940" searchorder="5" active="1">
 			<title>Image for closed post</title>
 			<searchstr><![CDATA[<div class="postbody">]]></searchstr>
 			<replacestr><![CDATA[<div class="postbody" 
-<vb:if condition="$show['rcd_ta_topic_closed_bg']">style="background: url({vb:stylevar imgdir_misc}/topic_closed_bg.png ) center;"</vb:if>>]]></replacestr>
+<vb:if condition="$show['rcd_ta_topic_closed_bg']">style="background-image: url({vb:stylevar imgdir_misc}/topic_closed_bg.png ); background-position: 0 0;"</vb:if>>]]></replacestr>
 		</templateedit>
 		<templateedit template="SHOWTHREAD" varname="rcd_ta_showthrd_btns_botm" username="ruseinov" version="4.0.8" dateline="1287135809" searchorder="5" active="1">
 			<title>Change buttons on thread bottom</title>
