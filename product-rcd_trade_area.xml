@@ -294,17 +294,17 @@ if ($threadman->fetch_field('open') AND
 	<faqentries>
 	</faqentries>
 	<templateedits>
-		<templateedit template="postbit_legacy" varname="rcd_ta_postbit_close_lmg" username="Vitaly" version="4.0.4" dateline="1299130940" searchorder="5" active="1">
+		<templateedit template="postbit_legacy" varname="rcd_ta_postbit_close_lmg" username="Vitaly" version="4.1.1 Alpha 1" dateline="1299130940" searchorder="5" active="1">
 			<title>Image for closed post</title>
 			<searchstr><![CDATA[<div class="postbody">]]></searchstr>
 			<replacestr><![CDATA[<div class="postbody" 
 <vb:if condition="$show['rcd_ta_topic_closed_bg']">style="background-image: url({vb:stylevar imgdir_misc}/topic_closed_bg.png ); background-position: 0 0;"</vb:if>>]]></replacestr>
 		</templateedit>
-		<templateedit template="SHOWTHREAD" varname="rcd_ta_showthrd_btns_botm" username="ruseinov" version="4.0.8" dateline="1287135809" searchorder="5" active="1">
+		<templateedit template="SHOWTHREAD" varname="rcd_ta_showthrd_btns_botm" username="Vitaly" version="4.1.1 Beta 1" dateline="1299829327" searchorder="5" active="1">
 			<title>Change buttons on thread bottom</title>
-			<searchstr><![CDATA[<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
-            class="newcontent_textcontrol" id="newreplylink_bottom"
-            ><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else />{vb:rawphrase closed_thread}</vb:if></a>]]></searchstr>
+			<searchstr><![CDATA[		<a href="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+			class="newcontent_textcontrol" id="newreplylink_bottom"
+			><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else />{vb:rawphrase closed_thread}</vb:if></a>]]></searchstr>
 			<replacestr><![CDATA[<vb:if condition="$show['rcd_ta_enabled']">  
 <vb:if condition="$thread['postuserid'] == $bbuserinfo['userid']">
 <a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
@@ -320,56 +320,55 @@ class="newcontent_textcontrol" style="left:138px;">{vb:rawphrase rcd_ta_open_thr
 </vb:if>
 <vb:else />
 <vb:if condition="$show['closethread']">
-<a href="private.php?{vb:raw session.sessionurl}do=newpm&amp;u={vb:raw thread.postuserid}&amp;postid={vb:raw LASTPOSTID}" 
+<a href="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}private.php?{vb:raw session.sessionurl}do=newpm&amp;u={vb:raw thread.postuserid}&amp;postid={vb:raw LASTPOSTID}" 
 class="newcontent_textcontrol" >{vb:rawphrase rcd_ta_contact_author}</a>
 <vb:else />
-<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+<a href="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
 class="newcontent_textcontrol" >
 {vb:rawphrase closed_thread}</a>
 </vb:if>
 </vb:if>
 <vb:else />
-<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+<a href="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
 class="newcontent_textcontrol" id="newreplylink_bottom"><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else />{vb:rawphrase closed_thread}</vb:if></a>
 </vb:if>]]></replacestr>
 		</templateedit>
-		<templateedit template="SHOWTHREAD" varname="rcd_ta_showthrd_btns_top" username="ruseinov" version="4.0.8" dateline="1287135820" searchorder="5" active="1">
+		<templateedit template="SHOWTHREAD" varname="rcd_ta_showthrd_btns_top" username="Vitaly" version="4.1.1 Beta 1" dateline="1299829034" searchorder="5" active="1">
 			<title>Change buttons on thread top</title>
-			<searchstr><![CDATA[<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+			<searchstr><![CDATA[			<a href="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
 class="newcontent_textcontrol" id="newreplylink_top"><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else />{vb:rawphrase closed_thread}</vb:if></a>
-			<img style="display:none" id="progress_newreplylink_top" src="{vb:stylevar imgdir_misc}/progress.gif"  alt="" />
-	]]></searchstr>
+			<img style="display:none" id="progress_newreplylink_top" src="{vb:stylevar imgdir_misc}/progress.gif"  alt="" />]]></searchstr>
 			<replacestr><![CDATA[<vb:if condition="$show['rcd_ta_enabled']">  
 <vb:if condition="$thread['postuserid'] == $bbuserinfo['userid']">
-<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+<a href="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
 class="newcontent_textcontrol" id="newreplylink_top" ><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else /> {vb:rawphrase closed_thread}</vb:if></a>
 <vb:if condition="$show['openclose']">
 <vb:if condition="$show['closethread']">
-<a href="postings.php?{vb:raw session.sessionurl}t={vb:raw threadid}&do=openclosethread" 
+<a href="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}postings.php?{vb:raw session.sessionurl}t={vb:raw threadid}&do=openclosethread" 
 class="newcontent_textcontrol" style="margin-left:10px;"><span>&nbsp;</span>{vb:rawphrase rcd_ta_close_thrd}</a>
 <vb:else />
-<a href="postings.php?{vb:raw session.sessionurl}t={vb:raw threadid}&do=openclosethread" 
+<a href="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}postings.php?{vb:raw session.sessionurl}t={vb:raw threadid}&do=openclosethread" 
 class="newcontent_textcontrol" style="margin-left:10px;">{vb:rawphrase rcd_ta_open_thrd}</a>
 </vb:if>
 </vb:if>
 <vb:else />
 <vb:if condition="$show['closethread']">
-<a href="private.php?{vb:raw session.sessionurl}do=newpm&amp;u={vb:raw thread.postuserid}&amp;postid={vb:raw LASTPOSTID}" 
+<a href="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}private.php?{vb:raw session.sessionurl}do=newpm&amp;u={vb:raw thread.postuserid}&amp;postid={vb:raw LASTPOSTID}" 
 class="newcontent_textcontrol" >{vb:rawphrase rcd_ta_contact_author}</a>
 <vb:else />
-<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+<a href="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
 class="newcontent_textcontrol" >
 {vb:rawphrase closed_thread}</a>
 </vb:if>
 </vb:if>
 <vb:else />
-<a href="newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
+<a href="{vb:raw $vboptions.vbforum_url}{vb:if "$vboptions['vbforum_url']", '/', ''}newreply.php?{vb:raw session.sessionurl}p={vb:raw LASTPOSTID}&amp;noquote=1" 
 class="newcontent_textcontrol" id="newreplylink_top"><vb:if condition="$show['closethread']"><span>+</span> {vb:rawphrase reply_to_thread}<vb:else />{vb:rawphrase closed_thread}</vb:if></a>
 </vb:if>
 <img style="display:none" id="progress_newreplylink_top" src="{vb:stylevar imgdir_misc}/progress.gif"  alt="" />
 ]]></replacestr>
 		</templateedit>
-		<templateedit template="threadbit" varname="rcd_ta_thread_city" username="Vitaly" version="4.0.5" dateline="1277383388" searchorder="5" active="1">
+		<templateedit template="threadbit" varname="rcd_ta_thread_city" username="Vitaly" version="4.1.1 Alpha 1" dateline="1277383388" searchorder="5" active="1">
 			<title>City in threads list</title>
 			<searchstr><![CDATA[			<div class="threaddetails td">
 				<div class="threaddetailicons">]]></searchstr>
